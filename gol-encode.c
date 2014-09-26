@@ -17,69 +17,136 @@ int randint(int start, int end) {
 void initCA(char ** ca, int width, int height) {
 	for (int i = 0; i < width; ++i) {
 		for (int j = 0; j < height; ++j) {
-			if (randint(0, 200) < 25)
-				ca[i][j] = 1;
-			else
-				ca[i][j] = 0;
+			ca[i][j] = initGlider(i, j);
+//			if (randint(0, 200) < 25)
+//				ca[i][j] = 1;
+//			else
+//				ca[i][j] = 0;
 		}
 	}
 }
 
-char * neighbors = NULL;
+int initGlider(int x, int y) {
+	if (x == 1 && y == 5)
+		return 1;
+	if (x == 1 && y == 6)
+		return 1;
+	if (x == 2 && y == 5)
+		return 1;
+	if (x == 2 && y == 6)
+		return 1;
+	if (x == 11 && y == 5)
+		return 1;
+	if (x == 11 && y == 6)
+		return 1;
+	if (x == 11 && y == 7)
+		return 1;
+	if (x == 12 && y == 4)
+		return 1;
+	if (x == 12 && y == 8)
+		return 1;
+	if (x == 13 && y == 3)
+		return 1;
+	if (x == 14 && y == 3)
+		return 1;
+	if (x == 13 && y == 9)
+		return 1;
+	if (x == 14 && y == 9)
+		return 1;
+	if (x == 15 && y == 6)
+		return 1;
+	if (x == 16 && y == 4)
+		return 1;
+	if (x == 16 && y == 8)
+		return 1;
+	if (x == 17 && y == 5)
+		return 1;
+	if (x == 17 && y == 6)
+		return 1;
+	if (x == 17 && y == 5)
+		return 1;
+	if (x == 17 && y == 6)
+		return 1;
+	if (x == 17 && y == 7)
+		return 1;
+	if (x == 18 && y == 6)
+		return 1;
+	if (x == 21 && y == 3)
+		return 1;
+	if (x == 21 && y == 4)
+		return 1;
+	if (x == 21 && y == 5)
+		return 1;
+	if (x == 22 && y == 3)
+		return 1;
+	if (x == 22 && y == 4)
+		return 1;
+	if (x == 22 && y == 5)
+		return 1;
+	if (x == 23 && y == 2)
+		return 1;
+	if (x == 23 && y == 6)
+		return 1;
+	if (x == 25 && y == 1)
+		return 1;
+	if (x == 25 && y == 2)
+		return 1;
+	if (x == 25 && y == 6)
+		return 1;
+	if (x == 25 && y == 7)
+		return 1;
+	if (x == 35 && y == 3)
+		return 1;
+	if (x == 35 && y == 4)
+		return 1;
+	if (x == 36 && y == 3)
+		return 1;
+	if (x == 36 && y == 4)
+		return 1;
+	return 0;
+}
 
-void nextGenCA(char ** ca, int width, int height) {
-
-	if (neighbors == NULL) neighbors = calloc(8, sizeof(char));
+void nextGenCA(char ** ca, char ** newCa, int width, int height) {
 
 	for (int i = 0; i < width; ++i) {
 		for (int j = 0; j < height; ++j) {
 
-			for (int k = 0; k < 8; ++k) {
-				neighbors[k] = 0;
-			}
+			int neighbors = 0;
 
 			if (i > 0) {
 				if (j > 0)
-					neighbors[0] = ca[i - 1][j - 1];
+					neighbors += ca[i - 1][j - 1];
 
 				if (j < height - 1)
-					neighbors[5] = ca[i - 1][j + 1];
+					neighbors += ca[i - 1][j + 1];
 
-				neighbors[3] = ca[i - 1][j];
+				neighbors += ca[i - 1][j];
 			}
 
 			if (i < width - 1) {
 				if (j > 0)
-					neighbors[2] = ca[i + 1][j - 1];
+					neighbors += ca[i + 1][j - 1];
 
 				if (j < height - 1)
-					neighbors[7] = ca[i + 1][j + 1];
+					neighbors += ca[i + 1][j + 1];
 
-				neighbors[4] = ca[i + 1][j];
+				neighbors += ca[i + 1][j];
 			}
 
 			if (j > 0)
-				neighbors[1] = ca[i][j - 1];
+				neighbors += ca[i][j - 1];
 
 			if (j < height - 1)
-				neighbors[6] = ca[i][j + 1];
-
-			int nrAlive = 0;
-
-			for (int k = 0; k < 8; ++k) {
-				if (neighbors[k] == 1) {
-					nrAlive++;
-				}
-			}
+				neighbors += ca[i][j + 1];
 
 			if (ca[i][j] == 1) {
-				if (nrAlive == 2 || nrAlive == 3)
-					ca[i][j] = 1;
+				if (neighbors == 2 || neighbors == 3)
+					newCa[i][j] = 1;
 				else
-					ca[i][j] = 0;
+					newCa[i][j] = 0;
 			} else {
-				if (nrAlive == 3)
-					ca[i][j] = 1;
+				if (neighbors == 3)
+					newCa[i][j] = 1;
 			}
 		}
 	}
@@ -189,23 +256,27 @@ int main(int argc, char **argv) {
 		cells[i] = calloc(C_HEIGHT, sizeof(char));
 	}
 
-	initCA(cells, C_WIDTH, C_HEIGHT);
+	char ** newCells = calloc(C_WIDTH, sizeof(char * ));
 
-	for (int i = 0; i < 100; ++i) {
-		nextGenCA(cells, C_WIDTH, C_HEIGHT);
+	for (int i = 0; i < C_WIDTH; ++i) {
+		newCells[i] = calloc(C_HEIGHT, sizeof(char));
 	}
 
-//	for (int j = 0; j <= C_HEIGHT; ++j) {
-//		for (int i = 0; i < C_WIDTH; ++i) {
-//			if (cells[i][j] == 1) printf("%s", "x");
-//			else printf("%s", "0");
-//		}
-//		printf("\n");
-//	}
+	initCA(cells, C_WIDTH, C_HEIGHT);
+
+	for (int i = 0; i < 1000; ++i) {
+		nextGenCA(cells, newCells, C_WIDTH, C_HEIGHT);
+
+		for (int j = 0; j <= C_HEIGHT; ++j) {
+			for (int i = 0; i < C_WIDTH; ++i) {
+				cells[i][j] = newCells[i][j];
+			}
+		}
+	}
 
 	int durationSeconds = 32;
 
-	short int * audioData = createAudioData(cells, C_WIDTH, C_HEIGHT, 44100, (44100 * durationSeconds));
+	short int * audioData = createAudioData(newCells, C_WIDTH, C_HEIGHT, 44100, (44100 * durationSeconds));
 
 	writeWav("gol.wav", (44100 * durationSeconds), audioData, 44100);
 

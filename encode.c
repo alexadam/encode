@@ -5,10 +5,8 @@
 #define C_WIDTH 200
 #define C_HEIGHT 2000
 
-typedef struct {
-	char from;
-	char to;
-} Rule;
+char ca60[8] = {0, 0, 1, 1, 1, 1, 0, 0};
+char ca110[8] = {0, 1, 1, 1, 0, 1, 1, 0};
 
 int randint(int start, int end) {
 	int r = rand() / (RAND_MAX / (end - start + 1) + 1);
@@ -18,11 +16,17 @@ int randint(int start, int end) {
 void initCA(char ** ca, int width, int height) {
 	for (int i = 0; i < width; ++i) {
 		ca[i][0] = randint(0, 1);
+
+		//Rule 60 init
+//		if (i == 0)
+//			ca[i][0] = 1;
+//		else
+//			ca[i][0] = 0;
 	}
 }
 
 //three neighbors
-void nextGenCA(char ** ca, Rule * rules, int nrOfRules, int level, int width, int height) {
+void nextGenCA(char ** ca, char * rules, int level, int width, int height) {
 	int lastLevel = level - 1;
 
 	if (lastLevel < 0)
@@ -32,16 +36,13 @@ void nextGenCA(char ** ca, Rule * rules, int nrOfRules, int level, int width, in
 		char pval = 0;
 
 		for (int v = 0; v < 3; ++v) {
-			int ci = i + v - (3-1)/2;
+			int ci = i + v - 1;
 
 			if (ci >= 0 && ci < width - 1)
-				pval += ca[ci][lastLevel] << (3 - v - 1);
+				pval += ca[ci][lastLevel] << (2 - v);
 		}
 
-		for (int r = 0; r < nrOfRules; ++r) {
-			if (rules[r].from == pval)
-				ca[i][level] = rules[r].to;
-		}
+		ca[i][level] = rules[pval];
 	}
 }
 
@@ -66,7 +67,7 @@ short int * createAudioData(char ** ca, int width, int height, int samplingRate,
 			if (volume == 0)
 				continue;
 
-			int freq = (int)(freqConst * (width - x - 1) );
+			int freq = (int)(freqConst * x);
 
 			rez += (int)(volume * sin(freq * 3.1415 * 2 * s /samplingRate));
 		}
@@ -149,42 +150,9 @@ int main(int argc, char **argv) {
 
 	initCA(cells, C_WIDTH, C_HEIGHT);
 
-	int nrOfRules = 8;
-	Rule * rules = malloc(nrOfRules * sizeof(Rule));
-
-// Rule 110
-//	for (int i = 0; i < nrOfRules; ++i) {
-//		rules[i].from = i;
-//
-//		if (i == 0 || i == 4 || i == 7)
-//			rules[i].to = 0;
-//		else
-//			rules[i].to = 1;
-//
-//	}
-
-//Rule 60
-		for (int i = 0; i < nrOfRules; ++i) {
-			rules[i].from = i;
-
-			if (i == 0 || i == 1 || i == 6 || i == 7)
-				rules[i].to = 0;
-			else
-				rules[i].to = 1;
-
-		}
-
 	for (int i = 0; i < C_HEIGHT; ++i) {
-		nextGenCA(cells, rules, nrOfRules, (i+1), C_WIDTH, C_HEIGHT);
+		nextGenCA(cells, ca110, (i+1), C_WIDTH, C_HEIGHT);
 	}
-
-//	for (int j = 0; j <= C_HEIGHT; ++j) {
-//		for (int i = 0; i < C_WIDTH; ++i) {
-//			if (cells[i][j] == 1) printf("%s", "x");
-//			else printf("%s", "0");
-//		}
-//		printf("\n");
-//	}
 
 	int durationSeconds = 32;
 
